@@ -35,23 +35,22 @@ End Module
 Public Class Balance
 
     Private _connection As Conexion = New Conexion("WEBTV", "192.168.60.150", "DeSoftv", "1975huli")
-
-
-    Public Function Poliza(Fecha_inicial As DateTime, Fecha_final As DateTime, sistema As String) As List(Of ResultadosPoliza)
+    
+        Public Function Poliza(Fecha_inicial As DateTime, Fecha_final As DateTime, sistema As String) As List(Of ResultadosPoliza)
 
         'Lista de facturas
         Dim ResultListado As List(Of ResultadosPoliza) = New List(Of ResultadosPoliza)
 
         'Query dinamica base de datos
         Dim sqlPoliza As String =
-            "SELECT 'CAJAS', SUM(monto) AS 'CAJAS' FROM Mayoristas.DBO.Historial_Pagos where FECHA BETWEEN " & "'" & Fecha_inicial.ToString("yyyy-dd-MM") & "'" & " AND " & "'" & Fecha_final.ToString("yyyy-dd-MM") & " 23:59:59'" & " and upper(estatus) like '%200OK%' AND tipo NOT IN('BONIFICACIÓN','CARGO','CARGO SALDO') AND UPPER(concepto)<>'CAMBIO PLAN SALDO'
+            "SELECT 'CAJAS' AS 'CONCEPTO', SUM(monto) AS 'HABER', 0 AS 'DEBE' FROM Mayoristas.DBO.Historial_Pagos where FECHA BETWEEN " & "'" & Fecha_inicial.ToString("yyyy-dd-MM") & "'" & " AND " & "'" & Fecha_final.ToString("yyyy-dd-MM") & " 23:59:59'" & " and upper(estatus) like '%200OK%' AND tipo NOT IN('BONIFICACIÓN','CARGO','CARGO SALDO') AND UPPER(concepto)<>'CAMBIO PLAN SALDO'
             UNION 
             -- FACTURAS OPENPAY
-            SELECT descripcion, SUM(MO.importe) AS 'TOTAL' FROM movimientosFacturaOpenpay MO inner join FacturasOpenPay FO ON (MO.id_factura = FO.id_factura)  WHERE FO.sistema_factura = " & "'" & sistema & "'" & " AND FO.estatus_factura = 2 AND FO.fecha_pago BETWEEN " & "'" & Fecha_inicial.ToString("yyyy-dd-MM") & "'" & " AND " & "'" & Fecha_final.ToString("yyyy-dd-MM") & " 23:59:59'" & " group by descripcion
+            SELECT descripcion,0, SUM(MO.importe)  FROM movimientosFacturaOpenpay MO inner join FacturasOpenPay FO ON (MO.id_factura = FO.id_factura)  WHERE FO.sistema_factura = " & "'" & sistema & "'" & " AND FO.estatus_factura = 2 AND FO.fecha_pago BETWEEN " & "'" & Fecha_inicial.ToString("yyyy-dd-MM") & "'" & " AND " & "'" & Fecha_final.ToString("yyyy-dd-MM") & " 23:59:59'" & " group by descripcion
             UNION 
-            select 'iva', SUM(MO.impuestoIVA) AS 'Total IVA' FROM movimientosFacturaOpenpay MO inner join FacturasOpenPay FO ON (MO.id_factura = FO.id_factura)  WHERE FO.sistema_factura = " & "'" & sistema & "'" & " AND FO.estatus_factura = 2 AND FO.fecha_pago BETWEEN " & "'" & Fecha_inicial.ToString("yyyy-dd-MM") & "'" & " AND " & "'" & Fecha_final.ToString("yyyy-dd-MM") & " 23:59:59 '" & "
+            select 'IVA', 0, SUM(MO.impuestoIVA)  FROM movimientosFacturaOpenpay MO inner join FacturasOpenPay FO ON (MO.id_factura = FO.id_factura)  WHERE FO.sistema_factura = " & "'" & sistema & "'" & " AND FO.estatus_factura = 2 AND FO.fecha_pago BETWEEN " & "'" & Fecha_inicial.ToString("yyyy-dd-MM") & "'" & " AND " & "'" & Fecha_final.ToString("yyyy-dd-MM") & " 23:59:59 '" & "
             UNION
-            SELECT 'IEPS', SUM (MO.impuestoIEPS) as 'Total IEPS' FROM  movimientosFacturaOpenpay MO inner join FacturasOpenPay FO ON (MO.id_factura = FO.id_factura)  WHERE FO.sistema_factura = " & "'" & sistema & "'" & " AND FO.estatus_factura = 2 AND FO.fecha_pago BETWEEN " & "'" & Fecha_inicial.ToString("yyyy-dd-MM") & "'" & " AND " & "'" & Fecha_final.ToString("yyyy-dd-MM") & " 23:59:59" & "'"
+            SELECT 'IEPS',0, SUM (MO.impuestoIEPS) FROM  movimientosFacturaOpenpay MO inner join FacturasOpenPay FO ON (MO.id_factura = FO.id_factura)  WHERE FO.sistema_factura = " & "'" & sistema & "'" & " AND FO.estatus_factura = 2 AND FO.fecha_pago BETWEEN " & "'" & Fecha_inicial.ToString("yyyy-dd-MM") & "'" & " AND " & "'" & Fecha_final.ToString("yyyy-dd-MM") & " 23:59:59" & "'"
 
         Dim dtPoliza As DataTable = _connection.ConsultarDT(sqlPoliza)
         If dtPoliza IsNot Nothing AndAlso dtPoliza.Rows.Count > 0 Then
@@ -70,7 +69,7 @@ Public Class Balance
 
         Return ResultListado
 
-    End Function
+    End Function    
 End Class
 
 Public Class ResultadosPoliza

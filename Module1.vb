@@ -77,3 +77,16 @@ Public Class ResultadosPoliza
     Property Descripcion As String
     Property Cantidad As Decimal
 End Class
+            
+            
+SELECT 'CAJAS', SUM(monto) AS 'CAJAS' FROM Mayoristas.DBO.Historial_Pagos where FECHA BETWEEN '2021-04-08' AND '2021-04-08 23:59:59' and upper(estatus) like '%200OK%' AND tipo NOT IN('BONIFICACIÓN','CARGO','CARGO SALDO') AND UPPER(concepto)<>'CAMBIO PLAN SALDO'
+UNION 
+-- FACTURAS OPENPAY
+SELECT descripcion, SUM(MO.importe) AS 'TOTAL' FROM movimientosFacturaOpenpay MO inner join FacturasOpenPay FO ON (MO.id_factura = FO.id_factura)  WHERE FO.sistema_factura = 'ILOXTELECOM' AND FO.estatus_factura = 2 AND FO.fecha_pago BETWEEN '2021-04-08' AND '2021-04-08 23:59:59' group by descripcion
+UNION 
+select 'iva', SUM(MO.impuestoIVA) AS 'Total IVA' FROM movimientosFacturaOpenpay MO inner join FacturasOpenPay FO ON (MO.id_factura = FO.id_factura)  WHERE FO.sistema_factura = 'ILOXTELECOM' AND FO.estatus_factura = 2 AND FO.fecha_pago BETWEEN '2021-04-08' AND '2021-04-08 23:59:59 '
+UNION
+SELECT 'IEPS', SUM (MO.impuestoIEPS) as 'Total IEPS' FROM  movimientosFacturaOpenpay MO inner join FacturasOpenPay FO ON (MO.id_factura = FO.id_factura)  WHERE FO.sistema_factura = 'ILOXTELECOM' AND FO.estatus_factura = 2 AND FO.fecha_pago BETWEEN '2021-04-08' AND '2021-04-08 23:59:59'
+          
+            
+            

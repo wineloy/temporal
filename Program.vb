@@ -24,7 +24,7 @@ Class RequestApi
 
     Public Function RequestLogin() As RestResponse
         Dim client As RestClient = New RestClient(url)
-        Dim json As String = "{""Name"": ""FACTUTACIONIT"", ""Password"": ""XRpDGANzd1""}"
+        Dim json As String = "{""Name"": ""XXX"", ""Password"": ""XXX""}"
         Dim request = New RestRequest(Method.POST)
         request.Resource = "acceso/login"
         request.AddHeader("Content-Type", "application/json")
